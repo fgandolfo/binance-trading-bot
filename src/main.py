@@ -12,8 +12,6 @@ trader = Binance_Trader()
 
 def main(stdscr):
 
-    _slope = CALL_SLOPE_FIRST
-
     MAX_X, MAX_Y, DIVIDER_BOTTOM = init_screen(stdscr)
 
     trader.add_ticker("XRPUSDT")
@@ -29,6 +27,7 @@ def main(stdscr):
         key = stdscr.getch()
         if key == ord('f') or key == ord('F'):
             sell_all_exit()
+            update_usdt(stdscr, MAX_Y, MAX_X)
             sleep(5)
             break
 
