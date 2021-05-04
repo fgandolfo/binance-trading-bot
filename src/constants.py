@@ -1,0 +1,14 @@
+import datetime
+
+TODAY_TIME = datetime.datetime.today().strftime("[%d-%m-%Y][%H:%M:%S]")
+DIVIDER_TOP = 3
+
+TITLE_BASELINE = DIVIDER_TOP - 2
+TICKER_BASELINE = DIVIDER_TOP + 4
+
+LEN_PRICE = 16
+LEN_PERCHG = 32
+LEN_TAB = 8
+
+CALL_SLOPE_FIRST = 14
+CALL_SLOPE_LAST = CALL_SLOPE_FIRST + 12
