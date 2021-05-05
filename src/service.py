@@ -1,8 +1,8 @@
+from binance.exceptions import BinanceAPIException
 from local_settings import API_KEY, API_SECRET
 from binance.client import Client
 from logger import logger_backend
-from binance.exceptions import BinanceAPIException
-
+import math
 
 class Binance_Service:
 
@@ -20,14 +20,16 @@ class Binance_Service:
             raise Exception
 
     def make_buy_call(self, symbol, _qty, precision):
-        _qty = round(_qty, precision)
+        
+        _qty = self.round_down(_qty, precision)
 
         try:
-            self.client.create_test_order(symbol=symbol, side="BUY", type="MARKET", quantity=_qty)
+            self.client.create_order(symbol=symbol, side=self.client.SIDE_BUY, type=self.client.ORDER_TYPE_MARKET, quantity=_qty)
+            logger_backend.info("Buy call executed for {0} {1}".format(_qty, symbol))
             return _qty
 
         except BinanceAPIException as e:
-            if "LOT_SIZE" in str(e):
+            if "LOT_SIZE" in str(e) or "Account has insufficient balance for requested action" in str(e):
                 return self.make_buy_call(symbol, _qty, precision-1)
         
             else:
@@ -40,15 +42,23 @@ class Binance_Service:
             logger_backend.error(error)
             raise Exception
 
-    def make_sell_call(self, symbol, _qty, precision):
-        _qty = round(_qty, precision)
+    def make_sell_call(self, symbol, _asset_balance, precision):
+
+        _qty = self.round_down(_asset_balance, precision)
+
+        if _qty > _asset_balance:
+            _qty = float(self.client.get_asset_balance(asset=symbol[:len(symbol)-4])['free'])
+            precision = 9
 
         try:
-            self.client.create_test_order(symbol=symbol, side="SELL", type="MARKET", quantity=_qty)
+            self.client.create_order(symbol=symbol, side=self.client.SIDE_SELL, type=self.client.ORDER_TYPE_MARKET, quantity=_qty)
+            logger_backend.info("Sell call executed for {0} {1}".format(_qty, symbol))
+            self.client.transfer_dust(asset=symbol[:len(symbol)-4]['free'])
+            
             return _qty
 
         except BinanceAPIException as e:
-            if "LOT_SIZE" in str(e):
+            if "LOT_SIZE" in str(e) or "Account has insufficient balance for requested action" in str(e):
                 return self.make_sell_call(symbol, _qty, precision-1)
         
             else:
@@ -60,3 +70,8 @@ class Binance_Service:
             error = str(e)
             logger_backend.error(error)
             raise Exception
+    
+    @staticmethod
+    def round_down(n, decimals=0):
+        multiplier = 10 ** decimals
+        return math.floor(n * multiplier) / multiplier
