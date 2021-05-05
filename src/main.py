@@ -16,8 +16,8 @@ def main(stdscr):
 
     trader.add_ticker("XRPUSDT")
     trader.add_ticker("ADAUSDT")
-    trader.add_ticker("ETHUSDT")
-    trader.add_ticker("BTCUSDT")
+    trader.add_ticker("CTSIUSDT")
+    trader.add_ticker("LTCUSDT")
     
     init_ui(stdscr, MAX_X, MAX_Y, DIVIDER_BOTTOM)
     update_usdt(stdscr, MAX_Y, MAX_X)
