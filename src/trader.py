@@ -17,7 +17,7 @@ class Binance_Trader:
             'lastSellPrice': 0.0,
             'lastPosition': 'SELL',
             'Quantity': 0.0,
-            'avl_usdt': 250
+            'avl_usdt': 125
         }
 
     def get_macd_indicator(self, symbol):
@@ -64,7 +64,9 @@ class Binance_Trader:
 
             return
 
-        _qty = self.controller.sell_ticker(symbol, _qty)
+        _asset_balance = float(self.controller.service.client.get_asset_balance(asset=symbol[:len(symbol)-4])['free'])
+        _qty = self.controller.sell_ticker(symbol, _asset_balance)
+        
         prev_qty = self.tickers['{0}'.format(symbol)]['Quantity']
         
         if (prev_qty - _qty) < 0:
